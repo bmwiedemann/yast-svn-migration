@@ -1,0 +1,49 @@
+#!/bin/bash
+
+YAST=/dev/shm/yast
+REPO=$YAST/REPO
+DUMPFILE=~/yast-svn-2012-02-14.dump
+svndumpfilter3=~/svndumpfilter3
+RULEDIR=~/svn-migration/yrules
+
+[ -d $REPO ] || mkdir -p $REPO
+if [ ! -d $REPO/db ]
+then
+   ## create the untangle repo
+   svnadmin create $REPO
+   svnadmin load $REPO < $DUMPFILE
+fi
+
+for MODULE in registration
+do
+  export MODULE
+  SKIP=false
+  if [ -f $YAST/$MODULE.dump ] || [ -e $YAST/$MODULE ]
+  then
+    read -p "Dump exists. Overwrite? (Y/n) " RES
+    case "$RES" in
+      n|N) echo "skipping..." ; SKIP=true
+           ;;
+      *) rm -rf $YAST/$MODULE.dump $YAST/$MODULE
+           ;;
+    esac
+  fi
+  if ! $SKIP
+  then
+    #sed "s/^Node-path: branches\/[^\/]\+$/&\/$MODULE/; s/^Node-copyfrom-path: branches\/[^\/]\+$/&\/$MODULE/" $DUMPFILE | $svndumpfilter3 --untangle=$REPO ".*/$MODULE" "branches/.*/$MODULE" > $YAST/$MODULE.dump 2>dumpfilter.out
+    $svndumpfilter3 --untangle=$REPO ".*/$MODULE" "branches/.*/$MODULE" < $DUMPFILE > $YAST/$MODULE.dump 2>dumpfilter.out
+    mkdir -p $YAST/$MODULE
+    svnadmin create $YAST/$MODULE
+    svn mkdir -m "create initial directories" file:///$YAST/$MODULE/trunk file:///$YAST/$MODULE/branches file:///$YAST/$MODULE/tags
+    svn mkdir --parents -m "create branches" $(for i in `grep "Node-path: branches/" $YAST/$MODULE.dump | cut -d"/" -f 2 | sort | uniq` ; do echo -n " file:///$YAST/$MODULE/branches/$i " ; done )
+    svnadmin load $YAST/$MODULE < $YAST/$MODULE.dump > $YAST/$MODULE.load 2>&1
+    svn ls file:///$YAST/$MODULE/trunk | grep -q . || echo "no trunk, aborting" && exit 1
+  fi
+
+  echo "declare MODULE=${MODULE}" > $RULEDIR/module.rule
+  svn-all-fast-export --add-metadata --identity-map $RULEDIR/yast.map --rules $RULEDIR/yast.rules $YAST/$MODULE
+  mv yast-$MODULE{,.git}
+  git clone yast-$MODULE.git
+
+done
+
