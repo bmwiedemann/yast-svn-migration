@@ -19,7 +19,7 @@ do
   export MODULE
   SKIP=false
   if test -n "$BATCH"
-    then rm -rf $YAST/$MODULE.dump $YAST/$MODULE
+    then rm -rf $YAST/$MODULE.dump $YAST/$MODULE.load $YAST/$MODULE
   fi
 
   if [ -f $YAST/$MODULE.dump ] || [ -e $YAST/$MODULE ]
@@ -28,7 +28,7 @@ do
     case "$RES" in
       n|N) echo "skipping..." ; SKIP=true
            ;;
-      *) rm -rf $YAST/$MODULE.dump $YAST/$MODULE
+      *) rm -rf $YAST/$MODULE.dump $YAST/$MODULE.load $YAST/$MODULE
            ;;
     esac
   fi

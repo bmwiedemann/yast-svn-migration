@@ -840,12 +840,12 @@ def main():
                 (d.get('Node-kind', ''), d['Node-action'], d['Node-path']))
 
         # jdsn + bernhard START
-        if lump.hdrdict.has_key("Node-copyfrom-path"):
+        module=os.environ["MODULE"]
+        if lump.hdrdict.has_key("Node-copyfrom-path") and not re.search(module+'$', lump.hdrdict["Node-copyfrom-path"]):
             # catch copies of whole trunk / branches (that include our module)
-            module=os.environ["MODULE"]
             origsrcpath = lump.hdrdict["Node-copyfrom-path"]
             srcrevision = lump.hdrdict["Node-copyfrom-rev"]
-            re_interesting='((^branches/[^/]+$)|(^tags/[^/]+$)|(^trunk$))'
+            re_interesting='((^branches/.+)|(^tags/[^/]+$)|(^trunk$))'
             srcpath = re.sub(re_interesting, '\\1/' + module, origsrcpath)
             print >> flog, "Node-copyfrom-path: " + srcpath + "R:" + srcrevision + "  NodeP:" + lump.hdrdict["Node-path"]
             if lump.hdrdict["Node-copyfrom-path"] != srcpath:
@@ -863,7 +863,7 @@ def main():
         path = lump.hdrdict['Node-path']
         if not paths.interesting(path):
             # jdsn/bmw add missing branch dirs
-            if lump.hdrdict['Node-action'] == 'add' and lump.hdrdict['Node-kind'] == 'dir' and re.match("((^branches/?[^/]*$)|(^tags/?[^/]*$)|(^trunk$))",lump.hdrdict['Node-path']):
+            if lump.hdrdict['Node-action'] == 'add' and lump.hdrdict['Node-kind'] == 'dir' and re.match("((^branches)|(^tags/?[^/]*$)|(^trunk$))",lump.hdrdict['Node-path']):
                 write_mkdir(fw, lump.hdrdict['Node-path'])
                 continue
             # jdsn/bmw END
