@@ -845,14 +845,15 @@ def main():
             module=os.environ["MODULE"]
             origsrcpath = lump.hdrdict["Node-copyfrom-path"]
             srcrevision = lump.hdrdict["Node-copyfrom-rev"]
-            srcpath = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + module, origsrcpath)
+            re_interesting='((^branches/[^/]+$)|(^tags/[^/]+$)|(^trunk$))'
+            srcpath = re.sub(re_interesting, '\\1/' + module, origsrcpath)
             print >> flog, "Node-copyfrom-path: " + srcpath + "R:" + srcrevision + "  NodeP:" + lump.hdrdict["Node-path"]
             if lump.hdrdict["Node-copyfrom-path"] != srcpath:
                 svncmd = "svn ls -r " + srcrevision + " file://" + opts.repos + "/" + origsrcpath + " | grep -q " + module
                 print >> flog, svncmd
                 if os.system(svncmd) == 0:
                     write_mkdir(fw, lump.hdrdict["Node-path"])
-                    lump.hdrdict["Node-path"] = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + module, lump.hdrdict["Node-path"])
+                    lump.hdrdict["Node-path"] = re.sub(re_interesting, '\\1/' + module, lump.hdrdict["Node-path"])
                     print >> flog, "replaced Node-path:" + lump.hdrdict["Node-path"] + " ## Node-copyfrom-path: " + srcpath
                     lump.hdrdict["Node-copyfrom-path"] = srcpath
 
@@ -862,7 +863,7 @@ def main():
         path = lump.hdrdict['Node-path']
         if not paths.interesting(path):
             # jdsn/bmw add missing branch dirs
-            if lump.hdrdict['Node-action'] == 'add' and lump.hdrdict['Node-kind'] == 'dir' and re.match("((^branches/?[^/]*$)|(^trunk$))",lump.hdrdict['Node-path']):
+            if lump.hdrdict['Node-action'] == 'add' and lump.hdrdict['Node-kind'] == 'dir' and re.match("((^branches/?[^/]*$)|(^tags/?[^/]*$)|(^trunk$))",lump.hdrdict['Node-path']):
                 write_mkdir(fw, lump.hdrdict['Node-path'])
                 continue
             # jdsn/bmw END
