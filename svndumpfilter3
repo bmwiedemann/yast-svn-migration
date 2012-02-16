@@ -816,6 +816,21 @@ def main():
                 '   %-10s %-10s %s' %
                 (d.get('Node-kind', ''), d['Node-action'], d['Node-path']))
 
+        # jdsn + bernhard START
+        if lump.hdrdict.has_key("Node-copyfrom-path"):
+            srcpath = lump.hdrdict["Node-copyfrom-path"]
+            srcrevision = lump.hdrdict["Node-copyfrom-rev"]
+            srcpath = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + os.environ["MODULE"], srcpath)
+            print >> flog, "Node-copyfrom-path: " + srcpath + "R:" + srcrevision + "  NodeP:" + lump.hdrdict["Node-path"]
+            if lump.hdrdict["Node-copyfrom-path"] != srcpath:
+                svncmd = "svn ls -r " + srcrevision + " file://" + opts.repos + "/" + srcpath + " | grep -q ."
+                print >> flog, svncmd
+                if os.system(svncmd) == 0:
+                    lump.hdrdict["Node-path"] = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + os.environ["MODULE"], lump.hdrdict["Node-path"])
+                    print >> flog, "replaced Node-path:" + lump.hdrdict["Node-path"] + " ## Node-copyfrom-path: " + srcpath
+                    lump.hdrdict["Node-copyfrom-path"] = srcpath
+        # jdsn + bernhard END
+
         # Filter out the uninteresting lumps
         path = lump.hdrdict['Node-path']
         if not paths.interesting(path):
