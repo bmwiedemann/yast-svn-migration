@@ -818,15 +818,16 @@ def main():
 
         # jdsn + bernhard START
         if lump.hdrdict.has_key("Node-copyfrom-path"):
-            srcpath = lump.hdrdict["Node-copyfrom-path"]
+            module=os.environ["MODULE"]
+            origsrcpath = lump.hdrdict["Node-copyfrom-path"]
             srcrevision = lump.hdrdict["Node-copyfrom-rev"]
-            srcpath = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + os.environ["MODULE"], srcpath)
+            srcpath = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + module, origsrcpath)
             print >> flog, "Node-copyfrom-path: " + srcpath + "R:" + srcrevision + "  NodeP:" + lump.hdrdict["Node-path"]
             if lump.hdrdict["Node-copyfrom-path"] != srcpath:
-                svncmd = "svn ls -r " + srcrevision + " file://" + opts.repos + "/" + srcpath + " | grep -q ."
+                svncmd = "svn ls -r " + srcrevision + " file://" + opts.repos + "/" + origsrcpath + " | grep -q " + module
                 print >> flog, svncmd
                 if os.system(svncmd) == 0:
-                    lump.hdrdict["Node-path"] = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + os.environ["MODULE"], lump.hdrdict["Node-path"])
+                    lump.hdrdict["Node-path"] = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + module, lump.hdrdict["Node-path"])
                     print >> flog, "replaced Node-path:" + lump.hdrdict["Node-path"] + " ## Node-copyfrom-path: " + srcpath
                     lump.hdrdict["Node-copyfrom-path"] = srcpath
         # jdsn + bernhard END
