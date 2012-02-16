@@ -818,6 +818,7 @@ def main():
 
         # jdsn + bernhard START
         if lump.hdrdict.has_key("Node-copyfrom-path"):
+            # catch copies of whole trunk / branches (that include our module)
             module=os.environ["MODULE"]
             origsrcpath = lump.hdrdict["Node-copyfrom-path"]
             srcrevision = lump.hdrdict["Node-copyfrom-rev"]
@@ -830,11 +831,21 @@ def main():
                     lump.hdrdict["Node-path"] = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + module, lump.hdrdict["Node-path"])
                     print >> flog, "replaced Node-path:" + lump.hdrdict["Node-path"] + " ## Node-copyfrom-path: " + srcpath
                     lump.hdrdict["Node-copyfrom-path"] = srcpath
+            
         # jdsn + bernhard END
 
         # Filter out the uninteresting lumps
         path = lump.hdrdict['Node-path']
         if not paths.interesting(path):
+            # jdsn/bmw add missing branch dirs
+            if lump.hdrdict['Node-action'] == 'add' and lump.hdrdict['Node-kind'] == 'dir' and re.match("((^branches/?[^/]*$)|(^trunk$))",lump.hdrdict['Node-path']):
+                print >> flog, "XXX Matched:" + lump.hdrdict['Node-path']
+                lump.delhdr("Node-copyfrom-rev")
+                lump.delhdr("Node-copyfrom-path")
+                write_lump(fw, lump)
+                continue
+            # jdsn/bmw END
+
             filtered.add(path)
             continue
 
