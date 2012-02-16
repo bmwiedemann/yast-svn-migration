@@ -533,6 +533,29 @@ def write_lump(f, lump):
     if not lump.hdrdict.has_key("Revision-number"):
         f.write('\n')
 
+def write_one_mkdir(f, dirname):
+    f.write("Node-path: " + dirname + "\n")
+    f.write("Node-kind: dir\n")
+    f.write("Node-action: add\n")
+    f.write("Prop-content-length: 10\n")
+    f.write("Content-length: 10\n")
+    f.write("\nPROPS-END\n\n\n")
+
+mkdirhistory={}
+
+def write_mkdir(f, dirname):
+    """
+    write directory creation lump to file
+    """
+    dirs=dirname.split("/")
+    c=0
+    for d in dirs:
+        c+=1
+        tobecreated="/".join(dirs[0:c])
+        if mkdirhistory.has_key(tobecreated):
+            continue
+        mkdirhistory[tobecreated]=1
+        write_one_mkdir(f, tobecreated)
 
 def fetch_rev_rename(repos, srcrev, srcpath, path, fout, flog, format):
     """
@@ -828,10 +851,11 @@ def main():
                 svncmd = "svn ls -r " + srcrevision + " file://" + opts.repos + "/" + origsrcpath + " | grep -q " + module
                 print >> flog, svncmd
                 if os.system(svncmd) == 0:
+                    write_mkdir(fw, lump.hdrdict["Node-path"])
                     lump.hdrdict["Node-path"] = re.sub('((^branches/[^/]+$)|(^trunk$))', '\\1/' + module, lump.hdrdict["Node-path"])
                     print >> flog, "replaced Node-path:" + lump.hdrdict["Node-path"] + " ## Node-copyfrom-path: " + srcpath
                     lump.hdrdict["Node-copyfrom-path"] = srcpath
-            
+
         # jdsn + bernhard END
 
         # Filter out the uninteresting lumps
@@ -839,10 +863,7 @@ def main():
         if not paths.interesting(path):
             # jdsn/bmw add missing branch dirs
             if lump.hdrdict['Node-action'] == 'add' and lump.hdrdict['Node-kind'] == 'dir' and re.match("((^branches/?[^/]*$)|(^trunk$))",lump.hdrdict['Node-path']):
-                print >> flog, "XXX Matched:" + lump.hdrdict['Node-path']
-                lump.delhdr("Node-copyfrom-rev")
-                lump.delhdr("Node-copyfrom-path")
-                write_lump(fw, lump)
+                write_mkdir(fw, lump.hdrdict['Node-path'])
                 continue
             # jdsn/bmw END
 
