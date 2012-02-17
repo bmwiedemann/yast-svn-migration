@@ -543,7 +543,7 @@ def write_one_mkdir(f, dirname):
 
 mkdirhistory={}
 
-def write_mkdir(f, dirname):
+def write_mkdir(f, dirname, create=1):
     """
     write directory creation lump to file
     """
@@ -555,7 +555,8 @@ def write_mkdir(f, dirname):
         if mkdirhistory.has_key(tobecreated):
             continue
         mkdirhistory[tobecreated]=1
-        write_one_mkdir(f, tobecreated)
+        if create:
+            write_one_mkdir(f, tobecreated)
 
 def fetch_rev_rename(repos, srcrev, srcpath, path, fout, flog, format):
     """
@@ -841,7 +842,7 @@ def main():
 
         # jdsn + bernhard START
         module=os.environ["MODULE"]
-        if lump.hdrdict.has_key("Node-copyfrom-path") and not re.search(module+'$', lump.hdrdict["Node-copyfrom-path"]):
+        if lump.hdrdict.has_key("Node-copyfrom-path") and not re.search('/'+module+'(/|$)', lump.hdrdict["Node-copyfrom-path"]):
             # catch copies of whole trunk / branches (that include our module)
             origsrcpath = lump.hdrdict["Node-copyfrom-path"]
             srcrevision = lump.hdrdict["Node-copyfrom-rev"]
@@ -870,6 +871,8 @@ def main():
 
             filtered.add(path)
             continue
+
+        write_mkdir(fw, lump.hdrdict['Node-path'], False)
 
         # See if any of the provided filters match against this file
         num_subs = 0
