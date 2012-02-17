@@ -547,7 +547,7 @@ def write_mkdir(f, dirname, create=1):
     """
     write directory creation lump to file
     """
-    dirs=dirname.split("/")
+    dirs=splitpath(dirname)
     c=0
     for d in dirs:
         c+=1
