@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Upload configuration
+GITSERVER=git@git.suse.de
+GITPROJ=yast-git-preview
+GITURL=$GITSERVER:$GITPROJ
+
+
+for i in $MODULES
+do
+  pushd yast-$i.git
+  git remote add origin2 $GITURL/yast-${i}.git
+  git push --all origin2
+  git push --tags origin2
+  popd
+done
