@@ -850,7 +850,7 @@ def main():
             srcpath = re.sub(re_interesting, '\\1/' + module, origsrcpath)
             print >> flog, "Node-copyfrom-path: " + srcpath + "R:" + srcrevision + "  NodeP:" + lump.hdrdict["Node-path"]
             if lump.hdrdict["Node-copyfrom-path"] != srcpath:
-                svncmd = "svn ls -r " + srcrevision + " file://" + opts.repos + "/" + origsrcpath + " | grep -q " + module
+                svncmd = "svn ls -r " + srcrevision + " file://" + opts.repos + "/" + origsrcpath + " | grep -q ^" + module +"/$"
                 print >> flog, svncmd
                 if os.system(svncmd) == 0:
                     write_mkdir(fw, lump.hdrdict["Node-path"])

@@ -35,11 +35,11 @@ do
   fi
   if ! $SKIP
   then
-    $svndumpfilter3 --untangle=$REPO `$ymoduleconf $MODULE`  "^trunk/^$MODULE$" "^branches/.*/^$MODULE$" "^tags/.*/^$MODULE$" < $DUMPFILE > $YAST/$MODULE.dump 2>$MODULE.dumpfilter.out
+    $svndumpfilter3 --untangle=$REPO `$ymoduleconf $MODULE`  "trunk/$MODULE" "branches/.*/$MODULE" "tags/.*/$MODULE" < $DUMPFILE > $YAST/$MODULE.dump 2>$MODULE.dumpfilter.out
     svnadmin create $YAST/$MODULE
     svnadmin load $YAST/$MODULE < $YAST/$MODULE.dump > $YAST/$MODULE.load 2>&1
     tail $YAST/$MODULE.load
-    svn ls file:///$YAST/$MODULE/trunk | grep -q . || { echo "no trunk, aborting" ; exit 1 ; }
+   # svn ls file:///$YAST/$MODULE/trunk | grep -q . || { echo "no trunk, aborting" ; exit 1 ; }
   fi
 
   echo "declare MODULE=${MODULE}" > $RULEDIR/module.rule # could cause race-condition - maybe use tmpdir

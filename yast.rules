@@ -87,6 +87,11 @@ match /branches/SuSE-Linux-([^/]+)-Branch/$
   repository yast-${MODULE}
   branch openSUSE-\1
 end match
+match /branches/tmp/mvidner/test101/${MODULE}/
+  repository yast-${MODULE}
+  branch openSUSE-10_1
+  prefix /
+end match
 
 # /tags/branch-Linux-11_4-2_20_5/storage/
 match /tags/branch-Linux-([\d_]+)-([\d_]+)/${MODULE}/
