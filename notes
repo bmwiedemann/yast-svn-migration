@@ -2,7 +2,7 @@
 
 YAST=/dev/shm/yast
 REPO=$YAST/REPO
-DUMPFILE=~/yast-svn-2012-02-14.dump
+DUMPFILE=~/yast-svn-2012-02-22.dump
 RULEDIR=~/svn-migration/yrules
 svndumpfilter3=$RULEDIR/svndumpfilter3
 ymoduleconf=$RULEDIR/ymodule.conf
@@ -19,6 +19,7 @@ for MODULE in $MODULES #printer core vm qt installation #registration # x11 core
 do
   export MODULE
   SKIP=false
+  mkdir yast-$MODULE.git
   if test -n "$BATCH"
     then rm -rf $YAST/$MODULE.dump $YAST/$MODULE.load $YAST/$MODULE
   fi
@@ -46,7 +47,9 @@ do
   svn-all-fast-export --add-metadata --identity-map $RULEDIR/yast.map --rules $MODULE.rules $YAST/$MODULE > $MODULE.fastexport.out
   rm -rf $YAST/$MODULE $MODULE.rules # cleanup to save space
   mv $YAST/$MODULE.{dump,load} .
+  rm -rf yast-$MODULE.git
   mv yast-$MODULE{,.git}
+  (cd yast-$MODULE.git && git update-server-info)
   git clone yast-$MODULE.git
   ( cd yast-$MODULE ; git log -1 | cat )
 

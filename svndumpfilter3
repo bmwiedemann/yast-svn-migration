@@ -571,7 +571,7 @@ def fetch_rev_rename(repos, srcrev, srcpath, path, fout, flog, format):
     # it in full.
     cmd = ('svnadmin', 'dump', '-r', str(srcrev),
            opts.repos, srcpath)
-    cmd_filter = ('svndumpfilter', '--drop-empty-revs', 'include', srcpath)
+    cmd_filter = ('svndumpfilter', 'include', srcpath)
     if opts.debug:
         print >> flog, ("Running command: '%s | %s'" %
                         (' '.join(cmd), ' '.join(cmd_filter)))
