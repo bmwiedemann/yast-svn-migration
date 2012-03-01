@@ -10,7 +10,7 @@ match /trunk/${MODULE}/
   # provide proper prefix path for commits with empty paths - see below as well
   prefix /
 end match
-match /trunk/
+match /trunk/$
   repository yast-${MODULE}
   branch master
 end match
@@ -92,6 +92,14 @@ match /branches/tmp/mvidner/test101/${MODULE}/
   branch openSUSE-10_1
   prefix /
 end match
+
+match /branches/tmp/lslezak/${MODULE}/
+  repository yast-${MODULE}
+  branch tmp-lslezak
+  prefix /
+end match
+
+
 
 # /tags/branch-Linux-11_4-2_20_5/storage/
 match /tags/branch-Linux-([\d_]+)-([\d_]+)/${MODULE}/

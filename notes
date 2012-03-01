@@ -1,21 +1,11 @@
 #!/bin/bash
 
 YAST=/dev/shm/yast
-REPO=$YAST/REPO
-DUMPFILE=~/yast-svn-2012-02-22.dump
 RULEDIR=~/svn-migration/yrules
 svndumpfilter3=$RULEDIR/svndumpfilter3
 ymoduleconf=$RULEDIR/ymodule.conf
 
-[ -d $REPO ] || mkdir -p $REPO
-if [ ! -d $REPO/db ]
-then
-   ## create the untangle repo
-   svnadmin create $REPO
-   svnadmin load $REPO < $DUMPFILE
-fi
-
-for MODULE in $MODULES #printer core vm qt installation #registration # x11 core mouse network printer ldap irda vm qt
+for MODULE in $MODULES
 do
   export MODULE
   SKIP=false
@@ -40,7 +30,6 @@ do
     svnadmin create $YAST/$MODULE
     svnadmin load $YAST/$MODULE < $YAST/$MODULE.dump > $YAST/$MODULE.load 2>&1
     tail $YAST/$MODULE.load
-   # svn ls file:///$YAST/$MODULE/trunk | grep -q . || { echo "no trunk, aborting" ; exit 1 ; }
   fi
 
   sed "s/include module.rule/declare MODULE=${MODULE}/" $RULEDIR/yast.rules > $MODULE.rules # avoid race-condition by having per-module file
