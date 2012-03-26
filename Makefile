@@ -20,7 +20,7 @@ $R: $D
 	svnadmin create $R
 	svnadmin load $R < $D
 migrationtest/yast-%.git: $R
-	cd $t ; export MODULES=`perl -e '$$_="$@";s{migrationtest/yast-(.*)\.git}{$$1};print'` ; echo "making $$MODULES" ; DUMPFILE=$D REPO=$R time sh -x ${PWD}/notes
+	cd $t ; export MODULES=`perl -e '$$_="$@";s{migrationtest/yast-(.*)\.git}{$$1};print'` ; rm -rf yast-$$MODULES.git yast-$$MODULES ; echo "making $$MODULES" ; DUMPFILE=$D REPO=$R time sh -x ${PWD}/notes
 
 regtest: $R
 	rm -rf migrationtest/yast-registration*

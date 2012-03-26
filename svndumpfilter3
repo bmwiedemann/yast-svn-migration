@@ -439,7 +439,7 @@ uuid_re = re.compile('UUID: ([0-9a-f\-]+)\s*$')
 
 def read_dump_header(f):
     """
-    Match and read a dumpfile's header and return the format versin and file's
+    Match and read a dumpfile's header and return the format version and file's
     UUID.
     """
     mo_version = format_re.match(f.readline())
