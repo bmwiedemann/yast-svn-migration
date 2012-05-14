@@ -4,5 +4,8 @@ branches: Makefile
 	svn ls $R/branches/|grep SuSE|sed 's/^/branches\//' > branches
 	echo trunk/ >>branches
 
+clean:
+	rm -f modules branches
+
 modules: branches
 	(for b in `cat branches` ; do svn ls $R/$$b ; done) | sort | uniq | sed 's/\/$$//' > modules

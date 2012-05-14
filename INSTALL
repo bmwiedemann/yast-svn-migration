@@ -1,5 +1,11 @@
+#!/bin/sh
 # on SP2
 cp -a svn-all-fast-export /usr/local/bin/
 zypper ar http://download.opensuse.org/repositories/devel:/tools:/scm/SLE_11_SP1/ devel_tools_scm
 zypper ar http://dist.suse.de/install/SLP/SLE-11-SP2-SDK-LATEST/x86_64/DVD1/ SP2SDK
 zypper in git-core subversion # needs svn 1.6 git-1.7
+
+mkdir -p /dev/shm/yast
+mount -t tmpfs -o size=95% tmpfs /dev/shm/yast
+
+# first run: make regtest
