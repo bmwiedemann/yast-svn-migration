@@ -1,6 +1,6 @@
 t=migrationtest
 R=/dev/shm/yast/REPO
-D=~/yast-svn-2012-05-11.dump
+D=~/yast-svn-2012-05-16-FINAL.dump
 #modules=$(shell cat yast.modules.2bexported)
 PWD=$(shell pwd)
 modules=$(shell cat modulelist/modules)
@@ -38,7 +38,7 @@ slpservertest: $R
 
 checkresults:
 #	tail -n 2 migrationtest/*.dumpfilter.out |grep -v "0 nodes converted"
-	tail -n 2 migrationtest/*.load|grep -v -e "Committed revision 68152" -e "^$$"
+	tail -n 2 migrationtest/*.load|grep -v -e "Committed revision 68173" -e "^$$"
 	tail -n 2 migrationtest/*.dumpfilter.out |grep -1 SystemExit
 #%: migrationtest/yast-%.git
 
