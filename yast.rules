@@ -93,6 +93,12 @@ match /branches/tmp/mvidner/test101/${MODULE}/
   prefix /
 end match
 
+match /branches/tmp/coolo/split_qt_pkg/${MODULE}/
+  repository yast-${MODULE}
+  branch coolo-split_qt_pkg
+  prefix /
+end match
+
 match /branches/tmp/lslezak/${MODULE}/
   repository yast-${MODULE}
   branch tmp-lslezak

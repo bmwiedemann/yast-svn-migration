@@ -451,6 +451,8 @@ def read_dump_header(f):
     assert mo_version
     f.readline()
     mo_uuid = uuid_re.match(f.readline())
+    if mo_uuid == None:
+        mo_uuid = uuid_re.match('UUID: 8badf00d')
     assert mo_uuid
     f.readline()
 
@@ -604,8 +606,8 @@ def fetch_rev_rename(repos, srcrev, srcpath, path, fout, flog, format):
 
     # Read and drpo the revision.
     lump_sub = read_lump(fs)
-    assert lump_sub is not None
-    assert lump_sub.hdrdict.has_key('Revision-number')
+    #assert lump_sub is not None
+    #assert lump_sub.hdrdict.has_key('Revision-number')
 
     while 1:
         # Read one lump at a time
