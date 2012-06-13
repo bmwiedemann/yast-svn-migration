@@ -111,9 +111,12 @@ for multiple project roots (it was my case).
 
 [2009-01-08] An bugfix patch was provided by Jamie Townsend <jtownsen at
 progress dot com>.
+
 [2009-04-05] Minor path matching improvements by Matthias Troffaes <matthias
 dot troffaes at gmail dot com>
 
+[2012-02-21] A few fixs  from "Bernhard M. Wiedemann" <bwiedemann dot
+suse at de> were applied.
 
 Important Note
 --------------
@@ -129,9 +132,9 @@ Here is a note from a user about a potential problem with the preservation of
 properties, with the >100 hr/week workload, I have no time to look into it at
 the moment:
 
-  From "Foldvari Gyorgy"
-  To blais@furius.ca
-  Subject	Critical bug in svndumpfilter3?	Show full header
+  From "Fldvri Gyrgy"
+  To  	blais@furius.ca
+  Subject  	Critical bug in svndumpfilter3? 	Show full header
   Hello Martin,
 
   First of all, your tool helped me a lot in my task. But I think I have
@@ -380,6 +383,7 @@ class Lump:
         if not self.propdict.has_key(key):
             self.proplist.append(key)
         self.propdict[key] = val
+        self.hasprop = True
 
     def delprop(self, key):
         """
@@ -407,7 +411,8 @@ class Lump:
                 else:
                     self.prop += "K %d\n%s\n" % (len(key), key)
                     self.prop += "V %d\n%s\n" % (len(val), val)
-            self.prop = self.prop + "PROPS-END\n"
+            if self.hasprop:
+                self.prop = self.prop + "PROPS-END\n"
 
         # Now fix up the content length headers.
         if len(self.prop) > 0:
@@ -415,7 +420,7 @@ class Lump:
         else:
             self.delhdr("Prop-content-length")
 
-        if len(self.text) > 0 or \
+        if self.hastext and len(self.text) >= 0 or \
            (self.hdrdict.get('Node-action', None) == 'add' and
             self.hdrdict.get('Node-kind', None) == 'file' and
             not self.hdrdict.get('Node-copyfrom-path', None)):
@@ -439,7 +444,7 @@ uuid_re = re.compile('UUID: ([0-9a-f\-]+)\s*$')
 
 def read_dump_header(f):
     """
-    Match and read a dumpfile's header and return the format version and file's
+    Match and read a dumpfile's header and return the format versin and file's
     UUID.
     """
     mo_version = format_re.match(f.readline())
@@ -500,12 +505,14 @@ def read_lump(f):
     lump, lines = read_rfc822_headers(f)
     if lump is None:
         return None
-    pcl = int(lump.hdrdict.get("Prop-content-length", "0"))
-    tcl = int(lump.hdrdict.get("Text-content-length", "0"))
-    if pcl > 0:
+    pcl = int(lump.hdrdict.get("Prop-content-length", "-1"))
+    tcl = int(lump.hdrdict.get("Text-content-length", "-1"))
+    lump.hasprop = pcl >= 0
+    if lump.hasprop:
         lump.prop = f.read(pcl)
         lump.propparse()
-    if tcl > 0:
+    lump.hastext = tcl >= 0
+    if lump.hastext:
         lump.text = f.read(tcl)
 
     lump.orig_text = os.linesep.join(lines) + lump.prop + lump.text
@@ -840,7 +847,6 @@ def main():
                 '   %-10s %-10s %s' %
                 (d.get('Node-kind', ''), d['Node-action'], d['Node-path']))
 
-        # jdsn + bernhard START
         module=os.environ["MODULE"]
         if lump.hdrdict.has_key("Node-copyfrom-path") and not re.search('/'+module+'(/|$)', lump.hdrdict["Node-copyfrom-path"]):
             # catch copies of whole trunk / branches (that include our module)
@@ -858,20 +864,15 @@ def main():
                     print >> flog, "replaced Node-path:" + lump.hdrdict["Node-path"] + " ## Node-copyfrom-path: " + srcpath
                     lump.hdrdict["Node-copyfrom-path"] = srcpath
 
-        # jdsn + bernhard END
-
         # Filter out the uninteresting lumps
         path = lump.hdrdict['Node-path']
         if not paths.interesting(path):
-            # jdsn/bmw add missing branch dirs
+            # add missing branch dirs
             if lump.hdrdict['Node-action'] == 'add' and lump.hdrdict['Node-kind'] == 'dir' and re.match("((^branches)|(^tags/?[^/]*$)|(^trunk$))",lump.hdrdict['Node-path']):
                 write_mkdir(fw, lump.hdrdict['Node-path'])
                 continue
-            # jdsn/bmw END
-
             filtered.add(path)
             continue
-
         write_mkdir(fw, lump.hdrdict['Node-path'], False)
 
         # See if any of the provided filters match against this file

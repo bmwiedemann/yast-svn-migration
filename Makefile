@@ -35,6 +35,9 @@ slpservertest: $R
 	make migrationtest/yast-slp-server.git
 	p=`pwd` ; cd migrationtest/yast-slp-server.git ; git log -1 | grep a8d76c7f9040aa3e7d8cac8d5c1e531b23ca655a && git branch -a | diff - $$p/ref/slp-server.branches
 
+qtpkg: $R
+	rm -rf migrationtest/yast-qt-pkg*
+	make migrationtest/yast-qt-pkg.git
 
 checkresults:
 #	tail -n 2 migrationtest/*.dumpfilter.out |grep -v "0 nodes converted"
