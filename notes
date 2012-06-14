@@ -1,10 +1,11 @@
 #!/bin/bash
 
-YAST=/dev/shm/yast
+YAST=/dev/shm/yast.$$
 RULEDIR=~/svn-migration/yrules
 svndumpfilter3=$RULEDIR/svndumpfilter3
 ymoduleconf=$RULEDIR/ymodule.conf
 
+mkdir -p $YAST
 for MODULE in $MODULES
 do
   export MODULE
@@ -44,3 +45,4 @@ do
 
 done
 
+rmdir $YAST
